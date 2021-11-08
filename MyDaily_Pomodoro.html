@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>My Pomodoro</title>
+	</head>
+	<body>
+		<h1>My Daily Pomodoro</h1>
+		<div id='pomodoros'><div id="pomodoro1"> </div>
+			                <div id="pomodoro2"> </div>
+			                <div id="pomodoro3"> </div>
+			                <div id="pomodoro4"> </div>
+		</div>
+		<div id='function'>
+		   <div id="select"> 
+		    <!--<select id='alter' onchange='alterAndSave'>
+			   <option id="none">None</option>
+			   <option id="workday">WorkDay</option>
+			   <option id="holiday">HoliDay</option>
+			 </select>-->
+			 Alter : <input id='box' type="checkbox" onclick="alterAndSave()">
+			</div>
+			 <div id="current"> 
+			</div>
+			 <div id="timer"> 25:00
+			</div>
+			 <div id="break"> 05:00
+			</div>
+			<div id="last">Last : <span id="lastPomodoro"></span>
+			</div>
+		</div>
+		<audio id="myAudio">
+		  <source src="ring.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="myBreak">
+		  <source src="breakend.mp3" type="audio/mpeg">
+		</audio>
+		<script>
+					var today=new Date();
+					var minute=25;
+					var second=60;
+					var breakminute=5;
+					var breaksecond=60;
+					var activePomodoro=false;
+					var myVar = setInterval(myTimer, 1000);
+					var pomodor="pomodoro"+today.getDate()+(today.getMonth()+1)+today.getFullYear();
+					var pomodorAlter="pomodorAlter"+today.getDate()+(today.getMonth()+1)+today.getFullYear();
+					var pomodorLast="pomodorLast"+today.getDate()+(today.getMonth()+1)+today.getFullYear();
+					var ring = document.getElementById("myAudio"); 
+					var mybreak = document.getElementById("myBreak"); 
+					if(localStorage.getItem(pomodor)===null){
+					                       localStorage.setItem(pomodor, "");
+					}
+					if(localStorage.getItem(pomodorLast)!==null){
+					                       document.getElementById('lastPomodoro').innerHTML=localStorage.getItem(pomodorLast);
+					}
+					function myTimer() {
+						var d = new Date();
+						document.getElementById("current").innerHTML = d.toLocaleTimeString();
+					}
+					var checkavailability=function(apple){
+					                        var state=localStorage.getItem(pomodor);
+											var stateArray=state.split(",");
+											stateArray.pop();
+											if(stateArray.indexOf(apple.id)===-1){
+											 return true;
+											}else{
+											 return false;
+											}
+					}
+					
+					var pomodoroActiveFunction=function(){
+					      if(!checkavailability(this)){
+						    return;
+						  }
+						  if(activePomodoro){
+						    alert("Unfinished Pomodoro");
+							return;
+						  }else{
+						    activePomodoro=true;
+						  }
+										   var that=this;
+										   this.setAttribute("src","./yellow_pomodoro2.jpg");
+										   myVar = setInterval(function(){
+																  second=second-1;
+																  if(second===59){
+																	 minute=minute-1;
+																  }
+																  if(minute>9&&second>9){
+																  document.getElementById("timer").innerHTML=(minute+':'+second);
+																  }else if(minute<=9&&second<=9){
+																  document.getElementById("timer").innerHTML=('0'+minute+':'+'0'+second);
+																  }else if(minute>9&&second<=9){
+																  document.getElementById("timer").innerHTML=(minute+':'+'0'+second);
+																  }else{
+																  document.getElementById("timer").innerHTML=('0'+minute+':'+second);
+																  }
+																  if(second===0){
+																	 if(minute===0){
+																		window.clearInterval(myVar);
+																		document.getElementById("timer").innerHTML='25:00';
+																		that.setAttribute("src","./green_pomodoro2.jpg");
+																		var todayPomodoro= localStorage.getItem(pomodor);
+																		todayPomodoro=todayPomodoro+that.id+",";
+																		localStorage.setItem(pomodor,todayPomodoro);
+																		activePomodoro=false;
+																		localStorage.setItem(pomodorLast,(new Date()).toLocaleTimeString());
+																		document.getElementById('lastPomodoro').innerHTML=((new Date()).toLocaleTimeString());
+																		minute=25;
+																		second=60;
+																		ring.play();
+																		breaker();
+																	 } 
+																	 second=60;
+																  }
+																}, 1000);
+										
+					};
+                    
+					var breaker=function(){
+					                         myBreakstart = setInterval(function(){
+																  breaksecond=breaksecond-1;
+																  if(breaksecond===59){
+																	 breakminute=breakminute-1;
+																  }
+																  if(breakminute>9&&breaksecond>9){
+																  document.getElementById("break").innerHTML=(breakminute+':'+breaksecond);
+																  }else if(breakminute<=9&&breaksecond<=9){
+																  document.getElementById("break").innerHTML=('0'+breakminute+':'+'0'+breaksecond);
+																  }else if(breakminute>9&&breaksecond<=9){
+																  document.getElementById("break").innerHTML=(breakminute+':'+'0'+breaksecond);
+																  }else{
+																  document.getElementById("break").innerHTML=('0'+breakminute+':'+breaksecond);
+																  }
+																  if(breaksecond===0){
+																	 if(breakminute===0){
+																		window.clearInterval(myBreakstart);
+																		document.getElementById("break").innerHTML='05:00';
+																		breakminute=5;
+																		breaksecond=60;
+																		mybreak.play();
+																	 } 
+																	 breaksecond=60;
+																  }
+																}, 1000);           
+					
+					};
+					
+					
+					var pomodorLayoutFunction=function(j,i,size){
+											
+											var apple=document.createElement("img");
+											apple.setAttribute("class","redApple");
+											if(size==="small"){
+													apple.setAttribute("width","120px");
+													apple.setAttribute("height","122px");
+													} else {
+													apple.setAttribute("width","140px");
+													apple.setAttribute("height","145px");
+													}
+											apple.setAttribute('id','redApple'+j+i);
+											    if(checkavailability(apple)){
+											          apple.setAttribute("src","./red_pomodoro2.jpg");
+											          apple.onclick=pomodoroActiveFunction;
+											    }else{
+											          apple.setAttribute("src","./green_pomodoro2.jpg");
+											    }
+											document.getElementById('pomodoro'+j).style.display="block";	
+											document.getElementById('pomodoro'+j).appendChild(apple);
+					}
+
+                    if((localStorage.getItem(pomodorAlter)===null)||(localStorage.getItem(pomodorAlter)==='false')){
+					if(today.getDay()===0||today.getDay()===6){
+					     for(var j=1;j<=4;j++){
+					          for(var i=1;i<=5;i++){
+					           if(j===4&&i===4){
+					             break;
+					           }
+					            pomodorLayoutFunction(j,i,'small');
+					         }
+					     }
+					}else{
+					    for(var j=1;j<=2;j++){
+					       for(var i=1;i<=6;i++){
+					          if(j===2&&i===5){
+					            break;
+					          }
+					         pomodorLayoutFunction(j,i,'big');
+					       }
+					    }
+					}}else{
+					document.getElementById('box').checked=true
+					if(today.getDay()===0||today.getDay()===6){
+					 
+					    for(var j=1;j<=2;j++){
+					       for(var i=1;i<=6;i++){
+					          if(j===2&&i===5){
+					            break;
+					          }
+					         pomodorLayoutFunction(j,i,'big');
+					       }
+					    }   
+					}else{
+					 for(var j=1;j<=4;j++){
+					          for(var i=1;i<=5;i++){
+					           if(j===4&&i===4){
+					             break;
+					           }
+					            pomodorLayoutFunction(j,i,'small');
+					         }
+					     }
+					}
+					}
+					 var alterAndSave=function(){
+					 console.log(this);
+					 if(localStorage.getItem(pomodorAlter)===null){
+					  localStorage.setItem(pomodorAlter, "true");
+					  }else{
+					  var alter=localStorage.getItem(pomodorAlter);
+					    if(alter==='true'){
+						 localStorage.setItem(pomodorAlter, false);
+						}else{
+						 localStorage.setItem(pomodorAlter, true);
+						}
+					  }
+					  
+					  location.reload();
+					}
+					</script>
+					<style>
+					        *{
+							  margin:0px;
+							}  
+							h1 {
+								   text-align:center;
+								   text-decoration:underline;
+								   background-color:green;
+								   color:White;
+								   padding-top:20px;
+								   padding-bottom:20px;
+								   margin-bottom:20px;
+							}
+							#pomodoros{
+									width:70%;
+									border:5px solid green; 
+									border-radius:15px;
+									float:left;
+							} 							 
+							#pomodoros div{
+									width:100%;
+									border-bottom:5px solid green; 
+							        display:none;
+							}
+							#pomodoros div:last-child{
+									border-bottom:none;
+							}
+							#function{
+							        width:25%;
+									border:5px solid green; 
+									border-radius:5px; 
+									float:right;									
+									height:220px;
+									font-size: 40px;
+									color:green;	
+							}
+							#select{
+							        text-align:center;
+									padding:4px;
+									height:40px;
+							}
+							#select select{
+							        margin:auto;
+							        width:60%;
+									border:none;
+									border-bottom:2px solid grey;
+									border-radius:20px;
+									font-size:20px;
+									padding:5px;
+									color:green;
+							}
+							#select select:focus {
+								    outline-width: 0;
+							}
+							#current{
+							        margin:auto;
+									text-align:center;
+									border-top:2px solid green;
+									border-bottom:2px solid green;
+									padding:4px;									
+							}
+							#timer{
+							        margin:auto;
+									text-align:center;
+									border-bottom:2px solid green;
+									padding:4px;
+							}
+							#break{
+							        margin:auto;
+									text-align:center;
+									padding:4px;
+							}
+							#box{
+									width: 20px; 
+									height: 20px;
+							}
+					</style>
+				</body>
+			</html>
